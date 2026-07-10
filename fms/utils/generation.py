@@ -199,6 +199,7 @@ def generate(
         ]
     ] = None,
     extra_kwargs: Optional[MutableMapping[str, Any]] = None,
+    prefill_only: bool = False,
 ):
     """
     A trivial generate function that can be used for validation/testing in
@@ -240,6 +241,9 @@ def generate(
         extra_kwargs: an optional mapping of additional kwargs to pass to the model.
             For example: if extra_kwargs contains position_ids and mask keys, these
             model parameters will be updated as-appropriate for each token generated.
+        prefill_only: if True, only run the prefill step (a single forward pass over
+            the input prompt) and return the result after generating a single token.
+            Useful for benchmarking prefill latency.
     """
     if num_beams != 1:
         raise NotImplementedError("generate() does yet not support beam search")
@@ -346,6 +350,9 @@ def generate(
             start_time = time.time()
 
         if eos_reached:
+            break
+
+        if prefill_only:
             break
 
     if timing == "e2e":
